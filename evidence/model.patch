@@ -1295,7 +1295,7 @@ index 000000000..a6fd7081c
 +已有 artifactRepo 经 GitHub API 确认 fork=true、parent=restic/restic、当前授权身份 admin/push=true；只向该 Fork 推送本题产物，不创建仓库或最终交付记录。
 diff --git a/evidence/review/evaluation.json b/evidence/review/evaluation.json
 new file mode 100644
-index 000000000..2e9dd7f19
+index 000000000..ab2c324e9
 --- /dev/null
 +++ b/evidence/review/evaluation.json
 @@ -0,0 +1,65 @@
@@ -1345,7 +1345,7 @@ index 000000000..2e9dd7f19
 +  ],
 +  "runResult": "1 通过\n2 通过\n3 通过\n4 通过\n5 未通过 验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径\n6 通过\n7 通过",
 +  "artifactResult": "1 通过\n2 通过\n3 通过\n4 通过\n5 未通过 验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径\n6 通过\n7 通过",
-+  "artifactMaterials": "逐条证据报告 evidence/review/rubric-comparison.txt；唯一截图 evidence/screenshots/01-rubric-comparison.png；代码与生命周期审计 evidence/review/code-audit.md；原专项和四类交错原始日志 evidence/review/runtime.log；真实 CLI 跨密钥 check/restore 与损坏 pack 拒绝日志 evidence/review/cli-final.log；审核测试通过 Go overlay 执行，未修改模型生产代码。预置离线材料 F:/swe/099934/authoring/offline-materials，301 项 SHA256 校验，空缓存、隔离公网、UID 65534；时长 evidence/review/session-duration.json；完整单次轨迹 evidence/trajectory.md；冻结 YAML 已实际解析 evidence/review/verify-rubric.yaml。",
++  "artifactMaterials": "已沿复制命令审计快照筛选、双仓库锁、批量上传等待、快照持久化和递归验证边界。使用声明的离线材料，在空缓存、阻断公网和普通用户权限下完成真实本地仓库验证。原有专项及元数据差异测试全部通过，取消、保存后数据丢失、重复对应和默认模式中断重跑四类受控交错各执行三次。跨密钥复制后检查完整数据并恢复文件，恢复内容与符号链接均一致。验证阶段取消仅返回取消错误且没有快照和路径，已稳定复现并据此判定第五项未通过；其余六项通过。项目证据目录保存完整单次轨迹、基线补丁、逐条报告、唯一终端证据图、原始验证日志与时长来源。审核用例通过叠加文件执行，没有修改模型生产实现。冻结评分清单已经实际解析并核对顺序、文本和类型。",
 +  "modelPatchFile": "F:/swe/099934/project-01/evidence/model.patch",
 +  "screenshotsDirectory": "F:/swe/099934/project-01/evidence/screenshots",
 +  "exceededTwoHours": "否",
@@ -1458,7 +1458,7 @@ index 000000000..b84594705
 +}
 diff --git a/evidence/review/prepare-review.mjs b/evidence/review/prepare-review.mjs
 new file mode 100644
-index 000000000..bcf4e3583
+index 000000000..7f1f57469
 --- /dev/null
 +++ b/evidence/review/prepare-review.mjs
 @@ -0,0 +1,51 @@
@@ -1509,7 +1509,7 @@ index 000000000..bcf4e3583
 +fs.writeFileSync(out+'/rubric-report.json',JSON.stringify({questionId:q.id,completionStatus:'部分完成',rubricResults,report},null,2)+'\n');
 +fs.copyFileSync(q.traceFile,root+'/evidence/trajectory.md');fs.copyFileSync(q.traceMetadataFile,out+'/trajectory.metadata.json');
 +const duration=JSON.parse(fs.readFileSync(out+'/session-duration.json','utf8'));
-+const materials='逐条证据报告 evidence/review/rubric-comparison.txt；唯一截图 evidence/screenshots/01-rubric-comparison.png；代码与生命周期审计 evidence/review/code-audit.md；原专项和四类交错原始日志 evidence/review/runtime.log；真实 CLI 跨密钥 check/restore 与损坏 pack 拒绝日志 evidence/review/cli-final.log；审核测试通过 Go overlay 执行，未修改模型生产代码。预置离线材料 F:/swe/099934/authoring/offline-materials，301 项 SHA256 校验，空缓存、隔离公网、UID 65534；时长 evidence/review/session-duration.json；完整单次轨迹 evidence/trajectory.md；冻结 YAML 已实际解析 evidence/review/verify-rubric.yaml。';
++const materials="已沿复制命令审计快照筛选、双仓库锁、批量上传等待、快照持久化和递归验证边界。使用声明的离线材料，在空缓存、阻断公网和普通用户权限下完成真实本地仓库验证。原有专项及元数据差异测试全部通过，取消、保存后数据丢失、重复对应和默认模式中断重跑四类受控交错各执行三次。跨密钥复制后检查完整数据并恢复文件，恢复内容与符号链接均一致。验证阶段取消仅返回取消错误且没有快照和路径，已稳定复现并据此判定第五项未通过；其余六项通过。项目证据目录保存完整单次轨迹、基线补丁、逐条报告、唯一终端证据图、原始验证日志与时长来源。审核用例通过叠加文件执行，没有修改模型生产实现。冻结评分清单已经实际解析并核对顺序、文本和类型。";
 +const evaluation={id:q.id,expectedSyncRevision:q.syncRevision,rounds:q.rounds,harness:q.harness,completionStatus:'部分完成',collectionDecision:'收录：长程题',rubricResults,runResult:result,artifactResult:result,artifactMaterials:materials,modelPatchFile:root+'/evidence/model.patch',screenshotsDirectory:root+'/evidence/screenshots',exceededTwoHours:duration.exceededTwoHours,sessionStartedAt:duration.sessionStartedAt,sessionCompletedAt:duration.sessionCompletedAt,sessionDurationSeconds:duration.sessionDurationSeconds,sessionDurationSource:duration.sessionDurationSource,sessionDurationEvidence:duration.evidence};
 +fs.writeFileSync(out+'/evaluation.json',JSON.stringify(evaluation,null,2)+'\n');
 +console.log(JSON.stringify({revision:q.syncRevision,completion:evaluation.completionStatus,results:result,yamlParsed:yv.ok}));
