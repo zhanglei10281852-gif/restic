@@ -1,0 +1,28 @@
+restic-8c201f64-9e29-47e5-988e-c76548a3324d | project-01 | 交付复盘
+完成度 部分完成 | 有效轮数 123（仅核对扫描）| 收录 长程题 | Session 2478 秒
+
+Rubric ID：1｜状态：通过｜期望行为：启用 --verify 后，每个源快照都按 Original 或等价持久身份在目标仓库找到唯一对应快照；缺失、重复或无法解析的对应关系返回非零并指出快照。｜实际观察：零候选被拒绝；两个已保存且 Original 相同的目标快照被拒绝，并列出源与两个目标 ID。｜直接证据：cmd_copy.go:442；TestFindDestinationSnapshot 与 TestReviewPersistentDuplicate 通过，runtime.log:321。
+
+Rubric ID：2｜状态：通过｜期望行为：验证递归比较源和目标树的路径、节点类型、大小、模式、时间、链接目标、设备元数据、内容 blob 序列、扩展属性、通用属性和子树；任一差异报告快照与路径并失败。｜实际观察：15 组节点差异均返回对应字段和 /file；递归验证逐层比较子树与数据序列。｜直接证据：cmd_copy.go:477、553、582；TestCompareNodes 15 子项全部通过，runtime.log:237。
+
+Rubric ID：3｜状态：通过｜期望行为：验证读取目标树及其所有数据 blob，校验目标 blob 解密解压后的内容哈希和 blob 序列；索引缺失、读取错误、哈希不匹配或树解析错误不得输出 verified。｜实际观察：目标加密 pack 被改写后退出 1，报具体快照、文件路径及 ciphertext verification failed，未打印 verified。｜直接证据：cmd_copy.go:493、666；cli-final.log:92-95；缺失 blob 与明文哈希篡改专项通过。
+
+Rubric ID：4｜状态：通过｜期望行为：本来会被跳过的等价快照也执行验证；新复制快照在保存后执行验证；输出逐快照 verified 结果和总数，任一失败使命令非零。｜实际观察：新保存和已跳过快照分别输出 verified 1 snapshots；保存成功后删除 pack 返回快照与根路径错误，未输出成功汇总。｜直接证据：cmd_copy.go:187、391；cli-final.log:60、64；runtime.log:303 的 POST_SAVE_LOSS 原始错误。
+
+Rubric ID：5｜状态：未通过｜期望行为：选择错误、验证错误、保存后验证错误和上下文取消均保留具体快照/路径错误并释放源、目标锁，不吞错、不把部分成功汇总为成功。｜实际观察：已复制源快照 6f48c3c1 的第二次真实读取成功后，审核 barrier 立即取消父 context。该次读取已提供完整源快照，verifySnapshots 随后在检查 ctx.Err 时直接返回。返回值严格等于 context canceled，捕获的 stdout 和 stderr 均为空，没有具体快照 ID 或路径。相同交错执行三次，三次得到相同返回与空输出；双仓库真实锁文件均为 0。｜直接证据：runtime.log:286、356、426 逐次记录 reads=2 error="context canceled" stdout="" stderr=""；cmd_copy.go:401-408 的 callback 丢弃快照标识并直接返回 ctx.Err；review_contract_test.go.txt:51-83 控制真实源 backend.Load 返回后的取消时点。｜原因：验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径｜影响：启用 --verify 的复制已进入指定源快照的验证阶段，用户只收到取消错误，不能从命令输出定位该次取消所对应的快照与验证路径。命令确实返回失败且双锁确实释放；未通过范围仅为冻结要求中的错误定位信息。｜证据位置：evidence/review/runtime.log:286、356、426；cmd/restic/cmd_copy.go:401-408；evidence/review/review_contract_test.go.txt:51-83。
+
+Rubric ID：6｜状态：通过｜期望行为：未指定 --verify 时，现有 copy 的快照筛选、等价快照跳过、批量上传/保存、取消退出和中断后重跑行为保持兼容。｜实际观察：默认关闭验证，筛选和跳过不输出 verified；首个快照保存后取消，重跑得到 2 个快照且 check 通过。｜直接证据：cmd_copy.go:78、180、187；原 TestCopy/Incremental 全通过；runtime.log:340 的 DEFAULT_CANCEL_RETRY。
+
+Rubric ID：7｜状态：通过｜期望行为：普通本地目录仓库之间的跨密钥复制仍能通过既有 copy 集成场景，复制后的目标能由 check 和 restore 读取，且不要求 Docker、FUSE、云账号或额外在线服务。｜实际观察：不同密钥的普通本地仓库通过 copy、check --read-data、restore；恢复文件 SHA256 和符号链接目标均一致。｜直接证据：cli-final.log:69-83、95；TestCopy 真实目录恢复比较通过；隔离公网、UID 65534，无容器或外部服务。
+
+关键原始证据（runtime.log；取消交错 -count=3）
+review_contract_test.go:81: CANCEL source=6f48c3c1233ad4327dcb81b393cf54b9e87af843cb318f8e0a65eab621b1a9e8 reads=2 error="context canceled" stdout="" stderr=""
+review_contract_test.go:81: CANCEL source=a3053d6c804816930fddcea162dce4fe840ce7ab443d5b2253f48365c7bfb207 reads=2 error="context canceled" stdout="" stderr=""
+review_contract_test.go:81: CANCEL source=2bf2fb58d070710548b57b6adc1b05c478e86f0c8295ce690d6c0dfbe361a563 reads=2 error="context canceled" stdout="" stderr=""
+代码 cmd_copy.go:401-408
+  FindAll(..., func(_ string, sn *data.Snapshot, err error) error {
+    if err != nil { return err }
+    if err := ctx.Err(); err != nil { return err }
+  // 此处在 findDestinationSnapshot、verifyTree 与 snapshot 错误包装之前返回
+验证结果：原专项 9 项及 15 个元数据子项通过；4 个审核交错各执行 3 次；check/restore 通过。
+取消缺陷复现用例的 PASS 表示上述缺口已被稳定观察，不表示 Rubric 5 通过。

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"iter"
+	"path"
+	"reflect"
 	"sync"
 	"time"
 
@@ -65,11 +68,14 @@ Exit status is 12 if the password is incorrect.
 type CopyOptions struct {
 	global.SecondaryRepoOptions
 	data.SnapshotFilter
+	Verify bool
 }
 
 func (opts *CopyOptions) AddFlags(f *pflag.FlagSet) {
 	opts.SecondaryRepoOptions.AddFlags(f, "destination", "to copy snapshots from")
 	initMultiSnapshotFilter(f, &opts.SnapshotFilter, true)
+
+	f.BoolVar(&opts.Verify, "verify", false, "verify that the snapshots are correctly stored in the destination repository")
 }
 
 var errSentinelEndIteration = errors.New("end iteration")
@@ -164,11 +170,7 @@ func runCopy(ctx context.Context, opts CopyOptions, gopts global.Options, args [
 		if err != nil {
 			return err
 		}
-		if sn.Original != nil && !sn.Original.IsNull() {
-			dstSnapshotByOriginal[*sn.Original] = append(dstSnapshotByOriginal[*sn.Original], sn)
-		}
-		// also consider identical snapshot copies
-		dstSnapshotByOriginal[*sn.ID()] = append(dstSnapshotByOriginal[*sn.ID()], sn)
+		addDestinationSnapshot(dstSnapshotByOriginal, sn)
 		return nil
 	})
 	if err != nil {
@@ -177,8 +179,24 @@ func runCopy(ctx context.Context, opts CopyOptions, gopts global.Options, args [
 
 	selectedSnapshots := collectAllSnapshots(ctx, opts, srcSnapshotLister, srcRepo, dstSnapshotByOriginal, args, printer)
 
-	if err := copyTreeBatched(ctx, srcRepo, dstRepo, selectedSnapshots, printer); err != nil {
+	savedSnapshotIDs, err := copyTreeBatched(ctx, srcRepo, dstRepo, selectedSnapshots, printer)
+	if err != nil {
 		return err
+	}
+
+	if opts.Verify {
+		// the snapshots saved during this run are not part of the destination
+		// snapshot list loaded above, reload and add them to the lookup map
+		for _, newID := range savedSnapshotIDs {
+			dstSn, err := data.LoadSnapshot(ctx, dstRepo, newID)
+			if err != nil {
+				return err
+			}
+			addDestinationSnapshot(dstSnapshotByOriginal, dstSn)
+		}
+		if err := verifySnapshots(ctx, opts, srcSnapshotLister, srcRepo, dstRepo, dstSnapshotByOriginal, args, printer); err != nil {
+			return err
+		}
 	}
 
 	return ctx.Err()
@@ -204,9 +222,10 @@ func similarSnapshots(sna *data.Snapshot, snb *data.Snapshot) bool {
 }
 
 // copyTreeBatched copies multiple snapshots in one go. Snapshots are written after
-// data equivalent to at least 10 packfiles was written.
+// data equivalent to at least 10 packfiles was written. It returns the IDs of the
+// snapshots that were saved in the destination repository.
 func copyTreeBatched(ctx context.Context, srcRepo *repository.Repository, dstRepo restic.Repository,
-	selectedSnapshots iter.Seq2[*data.Snapshot, error], printer restic.Printer) error {
+	selectedSnapshots iter.Seq2[*data.Snapshot, error], printer restic.Printer) (restic.IDs, error) {
 
 	// remember already processed trees across all snapshots
 	visitedTrees := srcRepo.NewAssociatedBlobSet()
@@ -217,6 +236,8 @@ func copyTreeBatched(ctx context.Context, srcRepo *repository.Repository, dstRep
 	// use pull-based iterator to allow iteration in multiple steps
 	next, stop := iter.Pull2(selectedSnapshots)
 	defer stop()
+
+	var savedSnapshotIDs restic.IDs
 
 	for {
 		var batch []*data.Snapshot
@@ -249,7 +270,7 @@ func copyTreeBatched(ctx context.Context, srcRepo *repository.Repository, dstRep
 			return nil
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// if no snapshots were processed in this batch, we're done
@@ -263,14 +284,15 @@ func copyTreeBatched(ctx context.Context, srcRepo *repository.Repository, dstRep
 		}
 		// save all the snapshots
 		for _, sn := range batch {
-			err := copySaveSnapshot(ctx, sn, dstRepo, printer)
+			newID, err := copySaveSnapshot(ctx, sn, dstRepo, printer)
 			if err != nil {
-				return err
+				return nil, err
 			}
+			savedSnapshotIDs = append(savedSnapshotIDs, newID)
 		}
 	}
 
-	return nil
+	return savedSnapshotIDs, nil
 }
 
 func copyTree(ctx context.Context, srcRepo *repository.Repository, dstRepo restic.Repository,
@@ -348,7 +370,7 @@ func copyStats(srcRepo restic.Repository, copyBlobs restic.AssociatedBlobSet, pa
 	return sizeBlobs
 }
 
-func copySaveSnapshot(ctx context.Context, sn *data.Snapshot, dstRepo restic.Repository, printer restic.Printer) error {
+func copySaveSnapshot(ctx context.Context, sn *data.Snapshot, dstRepo restic.Repository, printer restic.Printer) (restic.ID, error) {
 	sn.Parent = nil // Parent does not have relevance in the new repo.
 	// Use Original as a persistent snapshot ID
 	if sn.Original == nil {
@@ -356,8 +378,305 @@ func copySaveSnapshot(ctx context.Context, sn *data.Snapshot, dstRepo restic.Rep
 	}
 	newID, err := data.SaveSnapshot(ctx, dstRepo, sn)
 	if err != nil {
-		return err
+		return restic.ID{}, err
 	}
 	printer.P("snapshot %s saved, copied from source snapshot %s", newID.Str(), sn.ID().Str())
+	return newID, nil
+}
+
+// verifySnapshots verifies that each snapshot selected by the snapshot filter
+// has exactly one corresponding snapshot in the destination repository and
+// that the complete content of all snapshots is stored correctly there. This
+// also covers snapshots which were skipped because they were already copied.
+func verifySnapshots(ctx context.Context, opts CopyOptions,
+	srcSnapshotLister restic.Lister, srcRepo restic.Repository, dstRepo restic.Repository,
+	dstSnapshotByOriginal map[restic.ID][]*data.Snapshot, args []string, printer restic.Printer) error {
+
+	// remember blobs that were already verified to avoid reading them again
+	// for snapshots that share parts of their trees
+	verifiedBlobs := dstRepo.NewAssociatedBlobSet()
+
+	verifiedCount := 0
+	err := opts.SnapshotFilter.FindAll(ctx, srcSnapshotLister, srcRepo, args, func(_ string, sn *data.Snapshot, err error) error {
+		if err != nil {
+			return err
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		dstSn, err := findDestinationSnapshot(sn, dstSnapshotByOriginal)
+		if err != nil {
+			return fmt.Errorf("snapshot %s: %w", sn.ID().Str(), err)
+		}
+
+		if err := verifyTree(ctx, srcRepo, dstRepo, *sn.Tree, *dstSn.Tree, "/", verifiedBlobs); err != nil {
+			return fmt.Errorf("snapshot %s: %w", sn.ID().Str(), err)
+		}
+		printer.P("snapshot %s verified", sn.ID().Str())
+		verifiedCount++
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	printer.P("verified %d snapshots", verifiedCount)
+	return nil
+}
+
+// addDestinationSnapshot indexes a destination snapshot by its Original ID and
+// by its own snapshot ID, so that it can be matched against source snapshots.
+func addDestinationSnapshot(dstSnapshotByOriginal map[restic.ID][]*data.Snapshot, sn *data.Snapshot) {
+	if sn.Original != nil && !sn.Original.IsNull() {
+		dstSnapshotByOriginal[*sn.Original] = append(dstSnapshotByOriginal[*sn.Original], sn)
+	}
+	// also consider identical snapshot copies
+	dstSnapshotByOriginal[*sn.ID()] = append(dstSnapshotByOriginal[*sn.ID()], sn)
+}
+
+// findDestinationSnapshot returns the unique snapshot in the destination
+// repository which corresponds to the given source snapshot. It fails if the
+// corresponding snapshot is missing or exists more than once.
+func findDestinationSnapshot(srcSn *data.Snapshot, dstSnapshotByOriginal map[restic.ID][]*data.Snapshot) (*data.Snapshot, error) {
+	srcOriginal := *srcSn.ID()
+	if srcSn.Original != nil {
+		srcOriginal = *srcSn.Original
+	}
+
+	candidates, ok := dstSnapshotByOriginal[srcOriginal]
+	if !ok {
+		return nil, errors.Errorf("no corresponding snapshot found in the destination repository")
+	}
+
+	var dstSn *data.Snapshot
+	for _, candidate := range candidates {
+		if !similarSnapshots(candidate, srcSn) {
+			continue
+		}
+		if dstSn != nil {
+			return nil, errors.Errorf("multiple corresponding snapshots found in the destination repository (%s and %s)",
+				dstSn.ID().Str(), candidate.ID().Str())
+		}
+		dstSn = candidate
+	}
+
+	if dstSn == nil {
+		return nil, errors.Errorf("no corresponding snapshot found in the destination repository")
+	}
+	return dstSn, nil
+}
+
+// verifyTree recursively checks that the tree srcTreeID in the source
+// repository and the tree dstTreeID in the destination repository contain the
+// same nodes. All destination tree and data blobs are read, decrypted and
+// decompressed, and their content hashes are verified. The prefix is the path
+// of the tree within the snapshot, used for error messages.
+func verifyTree(ctx context.Context, srcRepo restic.Repository, dstRepo restic.Repository,
+	srcTreeID, dstTreeID restic.ID, prefix string, verifiedBlobs restic.AssociatedBlobSet) error {
+
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	dstTreeHandle := restic.BlobHandle{Type: restic.TreeBlob, ID: dstTreeID}
+	// a shared tree that was already fully verified does not need to be checked again
+	if srcTreeID.Equal(dstTreeID) && verifiedBlobs.Has(dstTreeHandle) {
+		return nil
+	}
+
+	if _, ok := dstRepo.LookupBlobSize(dstTreeHandle); !ok {
+		return errors.Errorf("path %q: tree blob %s is missing from the destination repository", prefix, dstTreeID.Str())
+	}
+
+	// loading the blob decrypts and decompresses it
+	dstTreeData, err := dstRepo.LoadBlob(ctx, dstTreeHandle, nil)
+	if err != nil {
+		return fmt.Errorf("path %q: failed to load tree blob %s: %w", prefix, dstTreeID.Str(), err)
+	}
+	if hash := restic.Hash(dstTreeData); !hash.Equal(dstTreeID) {
+		return errors.Errorf("path %q: tree blob %s content hash does not match, want %s, got %s",
+			prefix, dstTreeID.Str(), dstTreeID.Str(), hash.Str())
+	}
+
+	dstTree, err := data.NewTreeNodeIterator(bytes.NewReader(dstTreeData))
+	if err != nil {
+		return fmt.Errorf("path %q: failed to parse tree blob %s: %w", prefix, dstTreeID.Str(), err)
+	}
+	srcTree, err := data.LoadTree(ctx, srcRepo, srcTreeID)
+	if err != nil {
+		return fmt.Errorf("path %q: failed to load source tree blob %s: %w", prefix, srcTreeID.Str(), err)
+	}
+
+	for dt := range data.DualTreeIterator(srcTree, dstTree) {
+		if dt.Error != nil {
+			return fmt.Errorf("path %q: failed to parse tree: %w", prefix, dt.Error)
+		}
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		srcNode, dstNode := dt.Tree1, dt.Tree2
+		nodePath := prefix
+		switch {
+		case srcNode != nil:
+			nodePath = path.Join(prefix, srcNode.Name)
+		case dstNode != nil:
+			nodePath = path.Join(prefix, dstNode.Name)
+		}
+		if srcNode == nil || dstNode == nil {
+			side := "source"
+			if dstNode == nil {
+				side = "destination"
+			}
+			return errors.Errorf("path %q: node is missing in the %s repository", nodePath, side)
+		}
+
+		if err := verifyNode(ctx, srcRepo, dstRepo, srcNode, dstNode, nodePath, verifiedBlobs); err != nil {
+			return err
+		}
+	}
+
+	verifiedBlobs.Insert(dstTreeHandle)
+	return nil
+}
+
+// verifyNode compares all relevant fields of the two corresponding nodes,
+// verifies the node's content blobs in the destination repository and
+// recursively checks the subtree of a directory node.
+func verifyNode(ctx context.Context, srcRepo restic.Repository, dstRepo restic.Repository,
+	srcNode, dstNode *data.Node, nodePath string, verifiedBlobs restic.AssociatedBlobSet) error {
+
+	if err := compareNodes(srcNode, dstNode, nodePath); err != nil {
+		return err
+	}
+
+	// verify the content blob sequence in the destination repository
+	for _, blobID := range dstNode.Content {
+		if err := verifyDataBlob(ctx, dstRepo, blobID, nodePath, verifiedBlobs); err != nil {
+			return err
+		}
+	}
+
+	// recursively verify directory subtrees
+	if srcNode.Type == data.NodeTypeDir {
+		if srcNode.Subtree == nil || dstNode.Subtree == nil {
+			return errors.Errorf("path %q: subtree is missing", nodePath)
+		}
+		if err := verifyTree(ctx, srcRepo, dstRepo, *srcNode.Subtree, *dstNode.Subtree, nodePath, verifiedBlobs); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// compareNodes checks that the node path, type, size, mode, times, link
+// target, device information, content blob sequence, extended attributes,
+// generic attributes and subtree are identical in both nodes.
+func compareNodes(srcNode, dstNode *data.Node, nodePath string) error {
+	mismatch := func(field string, want, got any) error {
+		return errors.Errorf("path %q: %s mismatch: source=%v, destination=%v", nodePath, field, want, got)
+	}
+
+	if srcNode.Name != dstNode.Name {
+		return mismatch("name", srcNode.Name, dstNode.Name)
+	}
+	if srcNode.Type != dstNode.Type {
+		return mismatch("node type", srcNode.Type, dstNode.Type)
+	}
+	if srcNode.Mode != dstNode.Mode {
+		return mismatch("mode", srcNode.Mode, dstNode.Mode)
+	}
+	if srcNode.Size != dstNode.Size {
+		return mismatch("size", srcNode.Size, dstNode.Size)
+	}
+	if !srcNode.ModTime.Equal(dstNode.ModTime) {
+		return mismatch("modification time", srcNode.ModTime, dstNode.ModTime)
+	}
+	if !srcNode.AccessTime.Equal(dstNode.AccessTime) {
+		return mismatch("access time", srcNode.AccessTime, dstNode.AccessTime)
+	}
+	if !srcNode.ChangeTime.Equal(dstNode.ChangeTime) {
+		return mismatch("change time", srcNode.ChangeTime, dstNode.ChangeTime)
+	}
+	if srcNode.UID != dstNode.UID {
+		return mismatch("uid", srcNode.UID, dstNode.UID)
+	}
+	if srcNode.GID != dstNode.GID {
+		return mismatch("gid", srcNode.GID, dstNode.GID)
+	}
+	if srcNode.User != dstNode.User {
+		return mismatch("user", srcNode.User, dstNode.User)
+	}
+	if srcNode.Group != dstNode.Group {
+		return mismatch("group", srcNode.Group, dstNode.Group)
+	}
+	if srcNode.Inode != dstNode.Inode {
+		return mismatch("inode", srcNode.Inode, dstNode.Inode)
+	}
+	if srcNode.DeviceID != dstNode.DeviceID {
+		return mismatch("device id", srcNode.DeviceID, dstNode.DeviceID)
+	}
+	if srcNode.Links != dstNode.Links {
+		return mismatch("hardlink count", srcNode.Links, dstNode.Links)
+	}
+	if srcNode.LinkTarget != dstNode.LinkTarget {
+		return mismatch("link target", srcNode.LinkTarget, dstNode.LinkTarget)
+	}
+	if srcNode.Device != dstNode.Device {
+		return mismatch("device", srcNode.Device, dstNode.Device)
+	}
+	if len(srcNode.Content) != len(dstNode.Content) {
+		return errors.Errorf("path %q: content blob sequence length mismatch: source=%d, destination=%d",
+			nodePath, len(srcNode.Content), len(dstNode.Content))
+	}
+	for i := range srcNode.Content {
+		if !srcNode.Content[i].Equal(dstNode.Content[i]) {
+			return errors.Errorf("path %q: content blob at position %d mismatch: source=%s, destination=%s",
+				nodePath, i, srcNode.Content[i].Str(), dstNode.Content[i].Str())
+		}
+	}
+	if !reflect.DeepEqual(srcNode.ExtendedAttributes, dstNode.ExtendedAttributes) {
+		return mismatch("extended attributes", srcNode.ExtendedAttributes, dstNode.ExtendedAttributes)
+	}
+	if !reflect.DeepEqual(srcNode.GenericAttributes, dstNode.GenericAttributes) {
+		return mismatch("generic attributes", srcNode.GenericAttributes, dstNode.GenericAttributes)
+	}
+	switch {
+	case srcNode.Subtree == nil && dstNode.Subtree != nil:
+		return errors.Errorf("path %q: subtree is missing in the source repository", nodePath)
+	case srcNode.Subtree != nil && dstNode.Subtree == nil:
+		return errors.Errorf("path %q: subtree is missing in the destination repository", nodePath)
+	case srcNode.Subtree != nil && dstNode.Subtree != nil && !srcNode.Subtree.Equal(*dstNode.Subtree):
+		return errors.Errorf("path %q: subtree mismatch: source=%s, destination=%s",
+			nodePath, srcNode.Subtree.Str(), dstNode.Subtree.Str())
+	}
+	return nil
+}
+
+// verifyDataBlob checks that the data blob exists in the destination
+// repository and that the hash of its decrypted and decompressed content
+// matches its blob ID.
+func verifyDataBlob(ctx context.Context, dstRepo restic.Repository, blobID restic.ID,
+	nodePath string, verifiedBlobs restic.AssociatedBlobSet) error {
+
+	handle := restic.BlobHandle{Type: restic.DataBlob, ID: blobID}
+	if _, ok := dstRepo.LookupBlobSize(handle); !ok {
+		return errors.Errorf("path %q: data blob %s is missing from the destination repository", nodePath, blobID.Str())
+	}
+	if verifiedBlobs.Has(handle) {
+		return nil
+	}
+
+	// loading the blob decrypts and decompresses it
+	buf, err := dstRepo.LoadBlob(ctx, handle, nil)
+	if err != nil {
+		return fmt.Errorf("path %q: failed to load data blob %s: %w", nodePath, blobID.Str(), err)
+	}
+	if hash := restic.Hash(buf); !hash.Equal(blobID) {
+		return errors.Errorf("path %q: data blob %s content hash does not match, want %s, got %s",
+			nodePath, blobID.Str(), blobID.Str(), hash.Str())
+	}
+	verifiedBlobs.Insert(handle)
 	return nil
 }

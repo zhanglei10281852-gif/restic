@@ -1,0 +1,23 @@
+{
+  "file": "F:/swe/099934/project-01/evidence/screenshots/01-rubric-comparison.png",
+  "method": "PowerShell CopyFromScreen, explicit report terminal client region",
+  "visuallyOpened": true,
+  "containsQuestionId": true,
+  "allRubrics": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "failedRubric": 5,
+  "containsFailureReasonAndImpact": true,
+  "containsThreeRawCancellationResults": true,
+  "noUnrelatedUI": true,
+  "dimensions": [
+    1723,
+    807
+  ]
+}

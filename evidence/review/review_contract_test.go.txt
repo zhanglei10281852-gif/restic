@@ -1,0 +1,143 @@
+package main
+
+import (
+ "context"
+ "errors"
+ "io"
+ "os"
+ "path/filepath"
+ "strings"
+ "sync/atomic"
+ "testing"
+
+ "github.com/restic/restic/internal/backend"
+ "github.com/restic/restic/internal/data"
+ "github.com/restic/restic/internal/global"
+ rtest "github.com/restic/restic/internal/test"
+ "github.com/restic/restic/internal/ui/progress"
+)
+
+// Delegates to the real local backend. The barrier cancels only after the
+// second successful source snapshot read, at entry to post-copy verification.
+type reviewCancelBackend struct {
+ backend.Backend
+ id string
+ reads *atomic.Int32
+ cancel context.CancelFunc
+}
+func (b *reviewCancelBackend) Load(ctx context.Context, h backend.Handle, n int, off int64, fn func(io.Reader) error) error {
+ err := b.Backend.Load(ctx,h,n,off,fn)
+ if err == nil && h.Type == backend.SnapshotFile && h.Name == b.id && b.reads.Add(1)==2 { b.cancel() }
+ return err
+}
+
+// Deletes real local pack files after a real destination snapshot Save succeeds.
+// This models disk loss in the save/verify interval without replacing storage.
+type reviewLossBackend struct { backend.Backend; root string; fired *atomic.Bool }
+func (b *reviewLossBackend) Save(ctx context.Context, h backend.Handle, rd backend.RewindReader) error {
+ err := b.Backend.Save(ctx,h,rd)
+ if err==nil && h.Type==backend.SnapshotFile && b.fired.CompareAndSwap(false,true) {
+  err = filepath.WalkDir(filepath.Join(b.root,"data"),func(p string,d os.DirEntry,e error)error{
+   if e!=nil{return e};if !d.IsDir(){return os.Remove(p)};return nil
+  })
+ }
+ return err
+}
+
+type reviewSaveCancelBackend struct { backend.Backend; cancel context.CancelFunc; fired *atomic.Bool }
+func (b *reviewSaveCancelBackend) Save(ctx context.Context,h backend.Handle,rd backend.RewindReader)error{
+ err:=b.Backend.Save(ctx,h,rd)
+ if err==nil && h.Type==backend.SnapshotFile && b.fired.CompareAndSwap(false,true){b.cancel()}
+ return err
+}
+
+func reviewLocks(t *testing.T, roots ...string) {
+ for _,root:=range roots { entries,err:=os.ReadDir(filepath.Join(root,"locks"));rtest.OK(t,err);for _,e:=range entries{rtest.Assert(t,e.Name()=="tmp12345","remaining lock %s: %s",root,e.Name())} }
+ t.Log("LOCKS source=0 destination=0")
+}
+
+func TestReviewCancelAfterSourceRead(t *testing.T) {
+ src,clean:=withTestEnvironment(t);defer clean()
+ dst,clean2:=withTestEnvironment(t);defer clean2()
+ base:=setupCopyVerifyRepo(t,src)
+ testRunBackup(t,"",[]string{base},BackupOptions{},src.gopts)
+ testRunInit(t,dst.gopts)
+ testRunCopy(t,src.gopts,dst.gopts)
+ files,err:=os.ReadDir(filepath.Join(src.repo,"snapshots"));rtest.OK(t,err)
+ id:="";for _,e:=range files{if len(e.Name())==64{id=e.Name()}};rtest.Assert(t,id!="","snapshot missing")
+ g:=src.gopts;g.Repo=dst.repo;g.Password=dst.gopts.Password;g.NoCache=true;g.Quiet=false;g.Verbosity=1
+ opts:=CopyOptions{SecondaryRepoOptions:global.SecondaryRepoOptions{Repo:src.repo,Password:src.gopts.Password},Verify:true}
+ var reads atomic.Int32
+ out,stderr,err:=withCaptureStdoutStderr(t,g,func(ctx context.Context,g global.Options)error{
+  ctx,cancel:=context.WithCancel(ctx);defer cancel()
+  g.BackendTestHook=func(be backend.Backend)(backend.Backend,error){return &reviewCancelBackend{be,id,&reads,cancel},nil}
+  return runCopy(ctx,opts,g,[]string{id},g.Term)
+ })
+ rtest.Assert(t,reads.Load()==2,"barrier not reached: %d",reads.Load())
+ rtest.Assert(t,errors.Is(err,context.Canceled),"error %v",err)
+ rtest.Assert(t,err.Error()=="context canceled","observed error changed: %v",err)
+ rtest.Assert(t,!strings.Contains(out.String()+stderr.String(),id[:8]),"unexpected snapshot context: %s %s",out,stderr)
+ rtest.Assert(t,!strings.Contains(out.String(),"verified"),"false verification %s",out)
+ t.Logf("CANCEL source=%s reads=%d error=%q stdout=%q stderr=%q",id,reads.Load(),err,out.String(),stderr.String())
+ reviewLocks(t,src.repo,dst.repo)
+}
+
+func TestReviewLossAfterSnapshotSave(t *testing.T) {
+ src,clean:=withTestEnvironment(t);defer clean()
+ dst,clean2:=withTestEnvironment(t);defer clean2()
+ base:=setupCopyVerifyRepo(t,src)
+ testRunBackup(t,"",[]string{base},BackupOptions{},src.gopts)
+ testRunInit(t,dst.gopts)
+ g:=src.gopts;g.Repo=dst.repo;g.Password=dst.gopts.Password;g.NoCache=true;g.Quiet=false;g.Verbosity=1
+ var fired atomic.Bool
+ g.BackendTestHook=func(be backend.Backend)(backend.Backend,error){return &reviewLossBackend{be,dst.repo,&fired},nil}
+ opts:=CopyOptions{SecondaryRepoOptions:global.SecondaryRepoOptions{Repo:src.repo,Password:src.gopts.Password},Verify:true}
+ out,stderr,err:=withCaptureStdoutStderr(t,g,func(ctx context.Context,g global.Options)error{return runCopy(ctx,opts,g,nil,g.Term)})
+ rtest.Assert(t,fired.Load(),"save barrier not reached")
+ rtest.Assert(t,err!=nil && strings.Contains(err.Error(),"snapshot") && strings.Contains(err.Error(),"path"),"error %v",err)
+ rtest.Assert(t,!strings.Contains(out.String(),"verified"),"false verification %s",out)
+ t.Logf("POST_SAVE_LOSS error=%q stdout=%q stderr=%q",err,out.String(),stderr.String())
+ reviewLocks(t,src.repo,dst.repo)
+}
+
+func TestReviewPersistentDuplicate(t *testing.T) {
+ src,clean:=withTestEnvironment(t);defer clean()
+ dst,clean2:=withTestEnvironment(t);defer clean2()
+ base:=setupCopyVerifyRepo(t,src)
+ testRunBackup(t,"",[]string{base},BackupOptions{},src.gopts)
+ testRunInit(t,dst.gopts);testRunCopy(t,src.gopts,dst.gopts)
+ rtest.OK(t,withTermStatus(t,dst.gopts,func(ctx context.Context,g global.Options)error{
+  printer:=progress.NewTerminalPrinter(g.JSON,g.Verbosity,g.Term)
+  ctx,repo,unlock,err:=openWithAppendLock(ctx,g,false,printer);if err!=nil{return err};defer unlock()
+  sn:=firstTestSnapshot(ctx,t,repo);old:=*sn.ID();sn.ProgramVersion="review-duplicate-persistent-snapshot"
+  id,err:=data.SaveSnapshot(ctx,repo,sn);rtest.OK(t,err);rtest.Assert(t,id!=old,"duplicate needs distinct persistent ID")
+  t.Logf("PERSISTENT_DUPLICATES first=%s second=%s original=%s",old,id,sn.Original)
+  return nil
+ }))
+ out,stderr,err:=testRunCopyVerify(t,src.gopts,dst.gopts)
+ rtest.Assert(t,err!=nil && strings.Contains(err.Error(),"multiple corresponding snapshots"),"error %v",err)
+ rtest.Assert(t,!strings.Contains(out,"verified"),"false verification %s",out)
+ t.Logf("DUPLICATE error=%q stdout=%q stderr=%q",err,out,stderr)
+ reviewLocks(t,src.repo,dst.repo)
+}
+
+func TestReviewDefaultCancelRetry(t *testing.T){
+ src,clean:=withTestEnvironment(t);defer clean()
+ dst,clean2:=withTestEnvironment(t);defer clean2()
+ base:=setupCopyVerifyRepo(t,src);testRunBackup(t,"",[]string{base},BackupOptions{},src.gopts)
+ rtest.OK(t,os.WriteFile(filepath.Join(base,"new"),[]byte("second"),0600));testRunBackup(t,"",[]string{base},BackupOptions{},src.gopts)
+ testRunInit(t,dst.gopts)
+ g:=src.gopts;g.Repo=dst.repo;g.Password=dst.gopts.Password
+ opts:=CopyOptions{SecondaryRepoOptions:global.SecondaryRepoOptions{Repo:src.repo,Password:src.gopts.Password}}
+ var fired atomic.Bool
+ _,_,err:=withCaptureStdoutStderr(t,g,func(ctx context.Context,g global.Options)error{
+  ctx,cancel:=context.WithCancel(ctx);defer cancel()
+  g.BackendTestHook=func(be backend.Backend)(backend.Backend,error){return &reviewSaveCancelBackend{be,cancel,&fired},nil}
+  return runCopy(ctx,opts,g,nil,g.Term)
+ })
+ rtest.Assert(t,fired.Load() && errors.Is(err,context.Canceled),"cancel error %v",err)
+ reviewLocks(t,src.repo,dst.repo)
+ testRunCopy(t,src.gopts,dst.gopts)
+ testListSnapshots(t,dst.gopts,2);testRunCheck(t,dst.gopts)
+ t.Log("DEFAULT_CANCEL_RETRY snapshots=2 check=PASS")
+}

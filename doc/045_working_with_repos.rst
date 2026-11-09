@@ -286,6 +286,33 @@ which case only these instead of all snapshots will be copied:
 
     $ restic -r /srv/restic-repo-copy copy --from-repo /srv/restic-repo 410b18a2 4e5d5487 latest
 
+Verifying copied snapshots
+--------------------------
+
+The ``--verify`` flag makes ``copy`` check that every selected source snapshot
+is stored correctly in the destination repository. This includes snapshots that
+were not copied during the run because they were already present in the
+destination repository:
+
+.. code-block:: console
+
+    $ restic -r /srv/restic-repo-copy copy --from-repo /srv/restic-repo --verify
+
+For each source snapshot, ``copy`` locates the unique corresponding snapshot in
+the destination repository and recursively compares the complete snapshot tree,
+including file paths, node types, sizes, modes, timestamps, link targets,
+device information, extended and generic attributes, content blob sequences and
+subtrees. All destination tree and data blobs are read, decrypted and
+decompressed, and their content hashes are checked against the blob IDs. Each
+successfully verified snapshot is reported individually, followed by a summary
+of the number of verified snapshots.
+
+If a corresponding snapshot is missing or present more than once, a tree or
+index cannot be parsed, a destination blob is missing or its content does not
+match, or the operation is cancelled, ``copy`` exits with a non-zero exit status
+and the error message names the affected snapshot and path. Without ``--verify``
+the command behaves exactly as before.
+
 .. _copy-deduplication:
 
 Ensuring deduplication for copied snapshots

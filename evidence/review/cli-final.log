@@ -1,0 +1,98 @@
+MANIFEST_VERIFIED 301
+ENVIRONMENT {"HOME": "/tmp/restic-review-hqdy0a30/home", "GOMODCACHE": "/tmp/restic-review-hqdy0a30/modcache", "GOCACHE": "/tmp/restic-review-hqdy0a30/buildcache", "GOPROXY": "file:///mnt/f/swe/099934/authoring/offline-materials/proxy", "RESTIC_CACHE_DIR": "/tmp/restic-review-hqdy0a30/runtime-cache", "CGO_ENABLED": "0"}
+COMMAND ["/usr/bin/python3", "-c", "import socket,os;print('UID',os.getuid());socket.create_connection(('1.1.1.1',443),timeout=1)"] UID 65534
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/socket.py", line 865, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.12/socket.py", line 850, in create_connection
+    sock.connect(sa)
+OSError: [Errno 101] Network unreachable
+UID 65534
+
+EXIT 1
+COMMAND ["/tmp/restic-review-hqdy0a30/go/bin/go", "version"] UID 65534
+go version go1.26.10 linux/amd64
+
+EXIT 0
+COMMAND ["/usr/bin/python3", "/mnt/f/swe/099934/project-01/evidence/review/verify-cli.py", "/tmp/restic-review-hqdy0a30/tmp/restic", "/tmp/restic-review-hqdy0a30/tmp"] UID 65534
+CLI ["init"] EXIT 0
+created restic repository d0608a251d at /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src
+
+Please note that knowledge of your password is required to access
+the repository. Losing your password means that your data is
+irrecoverably lost.
+
+CLI ["init"] EXIT 0
+created restic repository 39c2165088 at /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst
+
+Please note that knowledge of your password is required to access
+the repository. Losing your password means that your data is
+irrecoverably lost.
+
+CLI ["backup", "--tag", "selected", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"] EXIT 0
+no parent snapshot found, will read all files
+
+Files:           2 new,     0 changed,     0 unmodified
+Dirs:            6 new,     0 changed,     0 unmodified
+Added to the repository: 29.876 KiB (2.650 KiB stored)
+
+processed 2 files, 26.602 KiB in 0:00
+snapshot ca07bb73 saved
+
+CLI ["backup", "--tag", "excluded", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"] EXIT 0
+using parent snapshot ca07bb73
+
+Files:           0 new,     0 changed,     2 unmodified
+Dirs:            0 new,     3 changed,     3 unmodified
+Added to the repository: 1.100 KiB (898 B stored)
+
+processed 2 files, 26.602 KiB in 0:00
+snapshot cc0c3c54 saved
+
+CLI ["copy", "--from-repo", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src", "--from-password-file", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass", "--tag", "selected", "--verify"] EXIT 0
+
+snapshot ca07bb73 of [/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input] at 2026-11-09 14:41:13.854655697 +0800 CST by nobody@localhost
+  copy started, this may take a while...
+[0:00] 100.00%  2 / 2 packs copied
+snapshot 3c040ae4 saved, copied from source snapshot ca07bb73
+snapshot ca07bb73 verified
+verified 1 snapshots
+
+CLI ["copy", "--from-repo", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src", "--from-password-file", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass", "--tag", "selected", "--verify"] EXIT 0
+snapshot ca07bb73 verified
+verified 1 snapshots
+
+CLI ["snapshots", "--json"] EXIT 0
+[{"time":"2026-11-09T14:41:13.854655697+08:00","tree":"e2cfc1eab946886e9c10281c547db8802e6a7d2607858371dd3bf81176238eea","paths":["/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"],"hostname":"localhost","username":"nobody","uid":65534,"gid":65534,"tags":["selected"],"original":"ca07bb736acf563269f8df52141c115826c56af56d109d31acd0cb170d389afd","program_version":"restic 0.19.1-dev (compiled manually)","summary":{"backup_start":"2026-11-09T14:41:13.854655697+08:00","backup_end":"2026-11-09T14:41:14.622139017+08:00","files_new":2,"files_changed":0,"files_unmodified":0,"dirs_new":6,"dirs_changed":0,"dirs_unmodified":0,"data_blobs":2,"tree_blobs":7,"data_added":30593,"data_added_packed":2714,"total_files_processed":2,"total_bytes_processed":27240},"id":"3c040ae48e80ec0b3d33bcd3f1c731eaed544b5bd69d87315c90733f13a95a47","short_id":"3c040ae4"}]
+
+CLI ["check", "--read-data"] EXIT 0
+create exclusive lock for repository
+load indexes
+check all packs
+check snapshots, trees and blobs
+[0:00] 100.00%  1 / 1 snapshots
+read all data
+[0:00] 100.00%  2 / 2 packs
+no errors were found
+
+CLI ["restore", "latest", "--target", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/restore"] EXIT 0
+restoring snapshot 3c040ae4 of [/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input] at 2026-11-09 14:41:13.854655697 +0800 CST by nobody@localhost to /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/restore
+Summary: Restored 9 files/dirs (26.602 KiB) in 0:00
+
+RESTORE_BYTE_AND_SYMLINK_COMPARISON PASS
+CLI ["copy", "--from-repo", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src", "--from-password-file", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass", "--tag", "selected"] EXIT 0
+
+CLI ["snapshots", "--json"] EXIT 0
+[{"time":"2026-11-09T14:41:13.854655697+08:00","tree":"e2cfc1eab946886e9c10281c547db8802e6a7d2607858371dd3bf81176238eea","paths":["/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"],"hostname":"localhost","username":"nobody","uid":65534,"gid":65534,"tags":["selected"],"original":"ca07bb736acf563269f8df52141c115826c56af56d109d31acd0cb170d389afd","program_version":"restic 0.19.1-dev (compiled manually)","summary":{"backup_start":"2026-11-09T14:41:13.854655697+08:00","backup_end":"2026-11-09T14:41:14.622139017+08:00","files_new":2,"files_changed":0,"files_unmodified":0,"dirs_new":6,"dirs_changed":0,"dirs_unmodified":0,"data_blobs":2,"tree_blobs":7,"data_added":30593,"data_added_packed":2714,"total_files_processed":2,"total_bytes_processed":27240},"id":"3c040ae48e80ec0b3d33bcd3f1c731eaed544b5bd69d87315c90733f13a95a47","short_id":"3c040ae4"}]
+
+CLI ["copy", "--from-repo", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src", "--from-password-file", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass", "--verify", "not-a-snapshot"] EXIT 1
+no matching ID found for prefix "not-a-snapshot"
+
+CLI ["copy", "--from-repo", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src", "--from-password-file", "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass", "--tag", "selected", "--verify"] EXIT 1
+snapshot ca07bb73: path "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input/sub/beta": failed to load data blob e96760a8: decrypting blob <data/e96760a8> from pack ff389724d07a5a39e430231ba9a4d346a2e89f194f9c80e3d894d9bde8df8986 failed: ciphertext verification failed
+
+CLI_LOCKS source=0 destination=0; CORRUPT_ENCRYPTED_PACK_REJECTED PASS
+
+EXIT 0
+OFFLINE_REVIEW_INITIAL_COMPLETED

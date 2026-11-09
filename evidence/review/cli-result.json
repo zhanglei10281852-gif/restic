@@ -1,0 +1,220 @@
+{
+  "records": [
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "init"
+      ],
+      "exitCode": 0,
+      "output": "created restic repository d0608a251d at /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src\n\nPlease note that knowledge of your password is required to access\nthe repository. Losing your password means that your data is\nirrecoverably lost.\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "init"
+      ],
+      "exitCode": 0,
+      "output": "created restic repository 39c2165088 at /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst\n\nPlease note that knowledge of your password is required to access\nthe repository. Losing your password means that your data is\nirrecoverably lost.\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "backup",
+        "--tag",
+        "selected",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"
+      ],
+      "exitCode": 0,
+      "output": "no parent snapshot found, will read all files\n\nFiles:           2 new,     0 changed,     0 unmodified\nDirs:            6 new,     0 changed,     0 unmodified\nAdded to the repository: 29.876 KiB (2.650 KiB stored)\n\nprocessed 2 files, 26.602 KiB in 0:00\nsnapshot ca07bb73 saved\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "backup",
+        "--tag",
+        "excluded",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input"
+      ],
+      "exitCode": 0,
+      "output": "using parent snapshot ca07bb73\n\nFiles:           0 new,     0 changed,     2 unmodified\nDirs:            0 new,     3 changed,     3 unmodified\nAdded to the repository: 1.100 KiB (898 B stored)\n\nprocessed 2 files, 26.602 KiB in 0:00\nsnapshot cc0c3c54 saved\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "copy",
+        "--from-repo",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "--from-password-file",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "--tag",
+        "selected",
+        "--verify"
+      ],
+      "exitCode": 0,
+      "output": "\nsnapshot ca07bb73 of [/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input] at 2026-11-09 14:41:13.854655697 +0800 CST by nobody@localhost\n  copy started, this may take a while...\n[0:00] 100.00%  2 / 2 packs copied\nsnapshot 3c040ae4 saved, copied from source snapshot ca07bb73\nsnapshot ca07bb73 verified\nverified 1 snapshots\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "copy",
+        "--from-repo",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "--from-password-file",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "--tag",
+        "selected",
+        "--verify"
+      ],
+      "exitCode": 0,
+      "output": "snapshot ca07bb73 verified\nverified 1 snapshots\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "snapshots",
+        "--json"
+      ],
+      "exitCode": 0,
+      "output": "[{\"time\":\"2026-11-09T14:41:13.854655697+08:00\",\"tree\":\"e2cfc1eab946886e9c10281c547db8802e6a7d2607858371dd3bf81176238eea\",\"paths\":[\"/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input\"],\"hostname\":\"localhost\",\"username\":\"nobody\",\"uid\":65534,\"gid\":65534,\"tags\":[\"selected\"],\"original\":\"ca07bb736acf563269f8df52141c115826c56af56d109d31acd0cb170d389afd\",\"program_version\":\"restic 0.19.1-dev (compiled manually)\",\"summary\":{\"backup_start\":\"2026-11-09T14:41:13.854655697+08:00\",\"backup_end\":\"2026-11-09T14:41:14.622139017+08:00\",\"files_new\":2,\"files_changed\":0,\"files_unmodified\":0,\"dirs_new\":6,\"dirs_changed\":0,\"dirs_unmodified\":0,\"data_blobs\":2,\"tree_blobs\":7,\"data_added\":30593,\"data_added_packed\":2714,\"total_files_processed\":2,\"total_bytes_processed\":27240},\"id\":\"3c040ae48e80ec0b3d33bcd3f1c731eaed544b5bd69d87315c90733f13a95a47\",\"short_id\":\"3c040ae4\"}]\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "check",
+        "--read-data"
+      ],
+      "exitCode": 0,
+      "output": "create exclusive lock for repository\nload indexes\ncheck all packs\ncheck snapshots, trees and blobs\n[0:00] 100.00%  1 / 1 snapshots\nread all data\n[0:00] 100.00%  2 / 2 packs\nno errors were found\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "restore",
+        "latest",
+        "--target",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/restore"
+      ],
+      "exitCode": 0,
+      "output": "restoring snapshot 3c040ae4 of [/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input] at 2026-11-09 14:41:13.854655697 +0800 CST by nobody@localhost to /tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/restore\nSummary: Restored 9 files/dirs (26.602 KiB) in 0:00\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "copy",
+        "--from-repo",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "--from-password-file",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "--tag",
+        "selected"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "snapshots",
+        "--json"
+      ],
+      "exitCode": 0,
+      "output": "[{\"time\":\"2026-11-09T14:41:13.854655697+08:00\",\"tree\":\"e2cfc1eab946886e9c10281c547db8802e6a7d2607858371dd3bf81176238eea\",\"paths\":[\"/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input\"],\"hostname\":\"localhost\",\"username\":\"nobody\",\"uid\":65534,\"gid\":65534,\"tags\":[\"selected\"],\"original\":\"ca07bb736acf563269f8df52141c115826c56af56d109d31acd0cb170d389afd\",\"program_version\":\"restic 0.19.1-dev (compiled manually)\",\"summary\":{\"backup_start\":\"2026-11-09T14:41:13.854655697+08:00\",\"backup_end\":\"2026-11-09T14:41:14.622139017+08:00\",\"files_new\":2,\"files_changed\":0,\"files_unmodified\":0,\"dirs_new\":6,\"dirs_changed\":0,\"dirs_unmodified\":0,\"data_blobs\":2,\"tree_blobs\":7,\"data_added\":30593,\"data_added_packed\":2714,\"total_files_processed\":2,\"total_bytes_processed\":27240},\"id\":\"3c040ae48e80ec0b3d33bcd3f1c731eaed544b5bd69d87315c90733f13a95a47\",\"short_id\":\"3c040ae4\"}]\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "copy",
+        "--from-repo",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "--from-password-file",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "--verify",
+        "not-a-snapshot"
+      ],
+      "exitCode": 1,
+      "output": "no matching ID found for prefix \"not-a-snapshot\"\n"
+    },
+    {
+      "command": [
+        "/tmp/restic-review-hqdy0a30/tmp/restic",
+        "--no-cache",
+        "-r",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst",
+        "-p",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/dst.pass",
+        "copy",
+        "--from-repo",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src",
+        "--from-password-file",
+        "/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/src.pass",
+        "--tag",
+        "selected",
+        "--verify"
+      ],
+      "exitCode": 1,
+      "output": "snapshot ca07bb73: path \"/tmp/restic-review-hqdy0a30/tmp/cli-_dm_2_0c/input/sub/beta\": failed to load data blob e96760a8: decrypting blob <data/e96760a8> from pack ff389724d07a5a39e430231ba9a4d346a2e89f194f9c80e3d894d9bde8df8986 failed: ciphertext verification failed\n"
+    }
+  ],
+  "restoreCompared": true,
+  "locksReleased": true
+}

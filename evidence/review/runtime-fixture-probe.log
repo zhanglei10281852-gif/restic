@@ -1,0 +1,388 @@
+MANIFEST_VERIFIED 301
+ENVIRONMENT {"HOME": "/tmp/restic-review-uslz8u3k/home", "GOMODCACHE": "/tmp/restic-review-uslz8u3k/modcache", "GOCACHE": "/tmp/restic-review-uslz8u3k/buildcache", "GOPROXY": "file:///mnt/f/swe/099934/authoring/offline-materials/proxy", "RESTIC_CACHE_DIR": "/tmp/restic-review-uslz8u3k/runtime-cache", "CGO_ENABLED": "0"}
+COMMAND ["/usr/bin/python3", "-c", "import socket,os;print('UID',os.getuid());socket.create_connection(('1.1.1.1',443),timeout=1)"] UID 65534
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/socket.py", line 865, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.12/socket.py", line 850, in create_connection
+    sock.connect(sa)
+OSError: [Errno 101] Network unreachable
+UID 65534
+
+EXIT 1
+COMMAND ["/tmp/restic-review-uslz8u3k/go/bin/go", "version"] UID 65534
+go version go1.26.10 linux/amd64
+
+EXIT 0
+COMMAND ["/tmp/restic-review-uslz8u3k/go/bin/go", "test", "./cmd/restic", "-run", "^(TestCopy|TestFindDestinationSnapshot$|TestCompareNodes$|TestVerifyTreeDetectsTamperedBlobs$)", "-count=1", "-v"] UID 65534
+go: downloading github.com/anacrolix/fuse v0.3.1
+go: downloading github.com/restic/chunker v0.5.0
+go: downloading github.com/spf13/cobra v1.10.2
+go: downloading github.com/spf13/pflag v1.0.10
+go: downloading go.uber.org/automaxprocs v1.6.0
+go: downloading golang.org/x/sync v0.22.0
+go: downloading golang.org/x/sys v0.47.0
+go: downloading github.com/pkg/errors v0.9.1
+go: downloading github.com/cenkalti/backoff/v4 v4.3.0
+go: downloading github.com/cespare/xxhash/v2 v2.3.0
+go: downloading github.com/hashicorp/golang-lru/v2 v2.0.7
+go: downloading golang.org/x/text v0.41.0
+go: downloading github.com/klauspost/compress v1.20.3
+go: downloading github.com/pkg/xattr v0.4.12
+go: downloading github.com/cpuguy83/go-md2man/v2 v2.0.6
+go: downloading go.yaml.in/yaml/v3 v3.0.5
+go: downloading github.com/peterbourgon/unixtransport v0.0.7
+go: downloading golang.org/x/net v0.58.0
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.1
+go: downloading github.com/Backblaze/blazer v0.9.0
+go: downloading cloud.google.com/go/storage v1.69.0
+go: downloading golang.org/x/oauth2 v0.36.0
+go: downloading google.golang.org/api v0.291.0
+go: downloading cloud.google.com/go v0.123.0
+go: downloading github.com/minio/minio-go/v7 v7.3.0
+go: downloading github.com/ncw/swift/v2 v2.0.5
+go: downloading github.com/pkg/sftp v1.13.11
+go: downloading golang.org/x/time v0.15.0
+go: downloading github.com/elithrar/simple-scrypt v1.4.1
+go: downloading golang.org/x/crypto v0.55.0
+go: downloading golang.org/x/term v0.45.0
+go: downloading github.com/russross/blackfriday/v2 v2.1.0
+go: downloading github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0
+go: downloading github.com/AzureAD/microsoft-authentication-library-for-go v1.8.0
+go: downloading cloud.google.com/go/compute/metadata v0.9.0
+go: downloading cloud.google.com/go/auth v0.22.0
+go: downloading cloud.google.com/go/iam v1.12.0
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.57.0
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/googleapis/gax-go/v2 v2.26.2
+go: downloading go.opentelemetry.io/contrib/detectors/gcp v1.45.0
+go: downloading go.opentelemetry.io/otel v1.45.0
+go: downloading go.opentelemetry.io/otel/metric v1.45.0
+go: downloading go.opentelemetry.io/otel/sdk/metric v1.45.0
+go: downloading go.opentelemetry.io/otel/sdk v1.45.0
+go: downloading go.opentelemetry.io/otel/trace v1.45.0
+go: downloading google.golang.org/genproto v0.0.0-20260715232425-e75dac1f907d
+go: downloading google.golang.org/grpc v1.83.2
+go: downloading google.golang.org/protobuf v1.36.11
+go: downloading github.com/dustin/go-humanize v1.0.1
+go: downloading github.com/klauspost/crc32 v1.3.0
+go: downloading github.com/minio/crc64nvme v1.1.1
+go: downloading github.com/minio/md5-simd v1.1.2
+go: downloading github.com/zeebo/xxh3 v1.1.0
+go: downloading gopkg.in/ini.v1 v1.67.3
+go: downloading github.com/kr/fs v0.1.0
+go: downloading github.com/kylelemons/godebug v1.1.0
+go: downloading github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
+go: downloading github.com/apache/arrow-go/v18 v18.7.0
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20260715232425-e75dac1f907d
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260724162435-b2f20204f0df
+go: downloading cloud.google.com/go/monitoring v1.30.0
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.35.0
+go: downloading github.com/go-logr/logr v1.4.4
+go: downloading cloud.google.com/go/auth/oauth2adapt v0.2.8
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.67.0
+go: downloading github.com/klauspost/cpuid/v2 v2.4.0
+go: downloading github.com/rs/xid v1.6.0
+go: downloading github.com/tinylib/msgp v1.6.4
+go: downloading github.com/golang-jwt/jwt/v5 v5.3.1
+go: downloading golang.org/x/exp v0.0.0-20260813180055-c1d0aacb2297
+go: downloading github.com/google/flatbuffers v25.12.19+incompatible
+go: downloading github.com/pierrec/lz4/v4 v4.1.28
+go: downloading go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0
+go: downloading github.com/go-logr/stdr v1.2.2
+go: downloading go.opentelemetry.io/auto/sdk v1.2.1
+go: downloading github.com/google/s2a-go v0.1.9
+go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.19
+go: downloading github.com/envoyproxy/go-control-plane/envoy v1.37.0
+go: downloading github.com/felixge/httpsnoop v1.0.4
+go: downloading github.com/goccy/go-json v0.10.6
+go: downloading github.com/philhofer/fwd v1.2.0
+go: downloading github.com/spiffe/go-spiffe/v2 v2.7.0
+go: downloading github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2
+go: downloading github.com/go-jose/go-jose/v4 v4.1.4
+go: downloading github.com/envoyproxy/protoc-gen-validate v1.3.3
+go: downloading cel.dev/expr v0.25.2
+=== RUN   TestCopy
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3630175214/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-3630175214/testdata/0/0/9] in 
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-3630175214/testdata/0/0/9/2] in 
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-3630175214/testdata/0/0/9/3] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2007922299/repo
+    io.go:318: Summary: Restored 77 files/dirs (1.073 MiB) in 0:00
+    io.go:318: Summary: Restored 9 files/dirs (16.000 KiB) in 0:00
+    io.go:318: Summary: Restored 9 files/dirs (16.000 KiB) in 0:00
+    io.go:318: Summary: Restored 9 files/dirs (16.000 KiB) in 0:00
+    io.go:318: Summary: Restored 77 files/dirs (1.073 MiB) in 0:00
+    io.go:318: Summary: Restored 9 files/dirs (16.000 KiB) in 0:00
+--- PASS: TestCopy (0.49s)
+=== RUN   TestCopyIncremental
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2016033653/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-2016033653/testdata/0/0/9] in 
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-2016033653/testdata/0/0/9/2] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1742698793/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-2016033653/testdata/0/0/9/3] in 
+--- PASS: TestCopyIncremental (0.58s)
+=== RUN   TestCopyUnstableJSON
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3971294395/repo
+--- PASS: TestCopyUnstableJSON (0.15s)
+=== RUN   TestCopyToEmptyPassword
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3671970824/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-3671970824/testdata/0/0/9] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3601096197/repo
+--- PASS: TestCopyToEmptyPassword (0.24s)
+=== RUN   TestCopyVerify
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-856521075/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-856521075/testdata/data] in 
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-856521075/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-821046550/repo
+--- PASS: TestCopyVerify (0.30s)
+=== RUN   TestCopyVerifyMissingDataBlob
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-4204046034/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-4204046034/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1091822820/repo
+--- PASS: TestCopyVerifyMissingDataBlob (0.21s)
+=== RUN   TestVerifyTreeDetectsTamperedBlobs
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1879798121/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-1879798121/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2327108005/repo
+--- PASS: TestVerifyTreeDetectsTamperedBlobs (0.18s)
+=== RUN   TestFindDestinationSnapshot
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2925977603/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-2925977603/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-784562692/repo
+--- PASS: TestFindDestinationSnapshot (0.19s)
+=== RUN   TestCompareNodes
+=== RUN   TestCompareNodes/name
+=== RUN   TestCompareNodes/node_type
+=== RUN   TestCompareNodes/mode
+=== RUN   TestCompareNodes/size
+=== RUN   TestCompareNodes/mtime
+=== RUN   TestCompareNodes/atime
+=== RUN   TestCompareNodes/ctime
+=== RUN   TestCompareNodes/link_target
+=== RUN   TestCompareNodes/device
+=== RUN   TestCompareNodes/device_id
+=== RUN   TestCompareNodes/content_length
+=== RUN   TestCompareNodes/content_id
+=== RUN   TestCompareNodes/extended_attributes
+=== RUN   TestCompareNodes/generic_attributes
+=== RUN   TestCompareNodes/subtree
+--- PASS: TestCompareNodes (0.00s)
+    --- PASS: TestCompareNodes/name (0.00s)
+    --- PASS: TestCompareNodes/node_type (0.00s)
+    --- PASS: TestCompareNodes/mode (0.00s)
+    --- PASS: TestCompareNodes/size (0.00s)
+    --- PASS: TestCompareNodes/mtime (0.00s)
+    --- PASS: TestCompareNodes/atime (0.00s)
+    --- PASS: TestCompareNodes/ctime (0.00s)
+    --- PASS: TestCompareNodes/link_target (0.00s)
+    --- PASS: TestCompareNodes/device (0.00s)
+    --- PASS: TestCompareNodes/device_id (0.00s)
+    --- PASS: TestCompareNodes/content_length (0.00s)
+    --- PASS: TestCompareNodes/content_id (0.00s)
+    --- PASS: TestCompareNodes/extended_attributes (0.00s)
+    --- PASS: TestCompareNodes/generic_attributes (0.00s)
+    --- PASS: TestCompareNodes/subtree (0.00s)
+PASS
+ok  	github.com/restic/restic/cmd/restic	2.344s
+
+EXIT 0
+COMMAND ["/tmp/restic-review-uslz8u3k/go/bin/go", "test", "-overlay=/tmp/restic-review-uslz8u3k/overlay.json", "./cmd/restic", "-run", "^TestReview", "-count=3", "-v"] UID 65534
+=== RUN   TestReviewCancelAfterSourceRead
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2430238076/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-2430238076/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2918244404/repo
+    review_contract_test.go:57: [31msnapshot count[39m
+        
+--- FAIL: TestReviewCancelAfterSourceRead (0.19s)
+=== RUN   TestReviewLossAfterSnapshotSave
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1920025702/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-1920025702/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1551983739/repo
+    review_contract_test.go:90: POST_SAVE_LOSS error="snapshot 67321927: path \"/\": failed to load tree blob de5baf4e: ReadFull(<data/cac31a70ce>): open /tmp/restic-review-uslz8u3k/tmp/restic-test-1551983739/repo/data/ca/cac31a70ce3b0aa073f1a87270f417251b1c880bb855ddafede80805e87f5bd7: no such file or directory" stdout="\nsnapshot 67321927 of [/tmp/restic-review-uslz8u3k/tmp/restic-test-1920025702/testdata/data] at 2026-11-09 14:36:25.139558935 +0800 CST by nobody@\n  copy started, this may take a while...\n[0:00] 100.00%  2 / 2 packs copied\nsnapshot 07f61513 saved, copied from source snapshot 67321927\n" stderr="Load(<data/cac31a70ce>, 250, 335) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-1551983739/repo/data/ca/cac31a70ce3b0aa073f1a87270f417251b1c880bb855ddafede80805e87f5bd7: no such file or directory\nLoad(<data/cac31a70ce>, 250, 335) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-1551983739/repo/data/ca/cac31a70ce3b0aa073f1a87270f417251b1c880bb855ddafede80805e87f5bd7: no such file or directory\n"
+    review_contract_test.go:46: [31mremaining locks /tmp/restic-review-uslz8u3k/tmp/restic-test-1920025702/repo: [- tmp12345][39m
+        
+--- FAIL: TestReviewLossAfterSnapshotSave (0.19s)
+=== RUN   TestReviewCancelAfterSourceRead
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1227056839/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-1227056839/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-502235284/repo
+    review_contract_test.go:57: [31msnapshot count[39m
+        
+--- FAIL: TestReviewCancelAfterSourceRead (0.18s)
+=== RUN   TestReviewLossAfterSnapshotSave
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-1339877447/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-1339877447/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2414892029/repo
+    review_contract_test.go:90: POST_SAVE_LOSS error="snapshot 43b32d96: path \"/\": failed to load tree blob 0801a870: ReadFull(<data/c11e40c26b>): open /tmp/restic-review-uslz8u3k/tmp/restic-test-2414892029/repo/data/c1/c11e40c26b50ca8be365b50c78bd00e3f6e23f5b6d62e5975a196df7f7c7c55c: no such file or directory" stdout="\nsnapshot 43b32d96 of [/tmp/restic-review-uslz8u3k/tmp/restic-test-1339877447/testdata/data] at 2026-11-09 14:36:25.510929047 +0800 CST by nobody@\n  copy started, this may take a while...\n[0:00] 100.00%  2 / 2 packs copied\nsnapshot 6fba5d86 saved, copied from source snapshot 43b32d96\n" stderr="Load(<data/c11e40c26b>, 249, 1116) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-2414892029/repo/data/c1/c11e40c26b50ca8be365b50c78bd00e3f6e23f5b6d62e5975a196df7f7c7c55c: no such file or directory\nLoad(<data/c11e40c26b>, 249, 1116) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-2414892029/repo/data/c1/c11e40c26b50ca8be365b50c78bd00e3f6e23f5b6d62e5975a196df7f7c7c55c: no such file or directory\n"
+    review_contract_test.go:46: [31mremaining locks /tmp/restic-review-uslz8u3k/tmp/restic-test-1339877447/repo: [- tmp12345][39m
+        
+--- FAIL: TestReviewLossAfterSnapshotSave (0.15s)
+=== RUN   TestReviewCancelAfterSourceRead
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-930026138/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-930026138/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-2343109128/repo
+    review_contract_test.go:57: [31msnapshot count[39m
+        
+--- FAIL: TestReviewCancelAfterSourceRead (0.19s)
+=== RUN   TestReviewLossAfterSnapshotSave
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3456884214/repo
+    cmd_backup_integration_test.go:28: backing up [/tmp/restic-review-uslz8u3k/tmp/restic-test-3456884214/testdata/data] in 
+    testing.go:30: using low-security KDF parameters for test
+    config.go:59: disabling check of the chunker polynomial
+    lock_file.go:93: setting lock timeout to 0s
+    cmd_init_integration_test.go:24: repository initialized at /tmp/restic-review-uslz8u3k/tmp/restic-test-3776925390/repo
+    review_contract_test.go:90: POST_SAVE_LOSS error="snapshot ad4c742b: path \"/\": failed to load tree blob 2a8dfd44: ReadFull(<data/637d5761be>): open /tmp/restic-review-uslz8u3k/tmp/restic-test-3776925390/repo/data/63/637d5761be060f8f9ccf0fbb29ee97f6ae8cbbf3b531b859bc09b46b6c271a75: no such file or directory" stdout="\nsnapshot ad4c742b of [/tmp/restic-review-uslz8u3k/tmp/restic-test-3456884214/testdata/data] at 2026-11-09 14:36:25.855493829 +0800 CST by nobody@\n  copy started, this may take a while...\n[0:00] 100.00%  2 / 2 packs copied\nsnapshot 972bfb48 saved, copied from source snapshot ad4c742b\n" stderr="Load(<data/637d5761be>, 250, 784) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-3776925390/repo/data/63/637d5761be060f8f9ccf0fbb29ee97f6ae8cbbf3b531b859bc09b46b6c271a75: no such file or directory\nLoad(<data/637d5761be>, 250, 784) failed: open /tmp/restic-review-uslz8u3k/tmp/restic-test-3776925390/repo/data/63/637d5761be060f8f9ccf0fbb29ee97f6ae8cbbf3b531b859bc09b46b6c271a75: no such file or directory\n"
+    review_contract_test.go:46: [31mremaining locks /tmp/restic-review-uslz8u3k/tmp/restic-test-3456884214/repo: [- tmp12345][39m
+        
+--- FAIL: TestReviewLossAfterSnapshotSave (0.18s)
+FAIL
+FAIL	github.com/restic/restic/cmd/restic	1.105s
+FAIL
+
+EXIT 1
+Traceback (most recent call last):
+  File "/mnt/f/swe/099934/project-01/evidence/review/verify-offline.py", line 50, in <module>
+    command([go, 'test', '-overlay='+str(overlay), './cmd/restic', '-run', '^TestReview', '-count=3', '-v'])
+  File "/mnt/f/swe/099934/project-01/evidence/review/verify-offline.py", line 41, in command
+    assert p.returncode == expected
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

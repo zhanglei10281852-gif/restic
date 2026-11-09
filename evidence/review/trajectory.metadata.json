@@ -1,0 +1,16 @@
+{
+  "questionId": "restic-8c201f64-9e29-47e5-988e-c76548a3324d",
+  "title": "为跨仓库 copy 增加可选复制后验证",
+  "repoUrl": "https://github.com/restic/restic",
+  "version": "c734245fd3ae9bcac8ab3aaafb4482d4b5d0ae92",
+  "researchDirectory": "F:\\swe\\099934\\project-01",
+  "batchDirectory": "F:\\swe\\099934",
+  "sessionId": "3823432080032809:56e85db892813f60612e4dfc50e6490e_6af15072414aef2bc7edfe0d.6af15073414aef2bc7edfe10.6af15072414aef2bc7edfe0e:TraeCode CN.3.3.104.no_sid.no_ppe.T(2026/11/9 12:47:47)",
+  "sourceFile": "trae-bridge:bridge_messages",
+  "localFile": "F:\\swe\\099934\\trajectories\\restic-8c201f64-9e29-47e5-988e-c76548a3324d-33249aca\\session-08797be8f1db765d.md",
+  "traceFormat": "trae-bridge:bridge_messages",
+  "memorySourceFile": "",
+  "memoryLocalFile": "",
+  "traceUpdatedAt": "2026-11-09T06:22:59.223Z",
+  "archivedAt": "2026-11-09T06:23:00.651Z"
+}

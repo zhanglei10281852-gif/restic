@@ -1,0 +1,65 @@
+{
+  "id": "restic-8c201f64-9e29-47e5-988e-c76548a3324d",
+  "expectedSyncRevision": 5,
+  "rounds": 123,
+  "harness": "Trae",
+  "completionStatus": "部分完成",
+  "collectionDecision": "收录：长程题",
+  "rubricResults": [
+    {
+      "id": 1,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": 2,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": 3,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": 4,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": 5,
+      "passed": false,
+      "reason": "验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径"
+    },
+    {
+      "id": 6,
+      "passed": true,
+      "reason": ""
+    },
+    {
+      "id": 7,
+      "passed": true,
+      "reason": ""
+    }
+  ],
+  "runResult": "1 通过\n2 通过\n3 通过\n4 通过\n5 未通过 验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径\n6 通过\n7 通过",
+  "artifactResult": "1 通过\n2 通过\n3 通过\n4 通过\n5 未通过 验证阶段第二次读取源快照后取消仅返回 context canceled 且未输出快照和路径\n6 通过\n7 通过",
+  "artifactMaterials": "逐条证据报告 evidence/review/rubric-comparison.txt；唯一截图 evidence/screenshots/01-rubric-comparison.png；代码与生命周期审计 evidence/review/code-audit.md；原专项和四类交错原始日志 evidence/review/runtime.log；真实 CLI 跨密钥 check/restore 与损坏 pack 拒绝日志 evidence/review/cli-final.log；审核测试通过 Go overlay 执行，未修改模型生产代码。预置离线材料 F:/swe/099934/authoring/offline-materials，301 项 SHA256 校验，空缓存、隔离公网、UID 65534；时长 evidence/review/session-duration.json；完整单次轨迹 evidence/trajectory.md；冻结 YAML 已实际解析 evidence/review/verify-rubric.yaml。",
+  "modelPatchFile": "F:/swe/099934/project-01/evidence/model.patch",
+  "screenshotsDirectory": "F:/swe/099934/project-01/evidence/screenshots",
+  "exceededTwoHours": "否",
+  "sessionStartedAt": "2026-11-09T04:47:47.530Z",
+  "sessionCompletedAt": "2026-11-09T05:29:06.447Z",
+  "sessionDurationSeconds": 2478,
+  "sessionDurationSource": "trae-session-realtime-duration",
+  "sessionDurationEvidence": {
+    "start": {
+      "file": "C:\\Users\\czxy4\\AppData\\Roaming\\Trae CN\\logs\\20261109T124703\\window1\\renderer.log",
+      "line": 683
+    },
+    "completed": {
+      "file": "C:\\Users\\czxy4\\AppData\\Roaming\\Trae CN\\logs\\20261109T124703\\window1\\renderer.log",
+      "line": 5220
+    }
+  }
+}
